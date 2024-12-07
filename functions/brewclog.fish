@@ -4,22 +4,6 @@ function brewclog
     # Author Laurent Taupiac
     # Purpose: display the last changlog of a brew formula
 
-### Help
-Usage: brewclog [options] <formula>
-Displays the changelog of the latest GitHub release of a Homebrew formula.
-
-Options:
-  -v, --verbose : Show additional information
-  -d, --debug   : Show debugging information
-  -h, --help    : Show this help message
-
-### Dependancies
-jq   - Commandline JSON processor 
-glow - Render markdown on the CLI, with pizzazz!
-
-### Limitations
-Works only for github 
-
     # Required commands
     set -l cmd_req jq glow
     for c in $cmd_req
