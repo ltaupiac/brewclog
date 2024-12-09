@@ -95,6 +95,7 @@ function brewclog
             echo "Current host: [$current_host]"
         end
         echo "This repository is not yet supported. Only GitHub is supported."
+        echo "host: $repo"
         set -e fish_trace fish_log
         return 1
     end
