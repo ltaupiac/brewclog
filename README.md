@@ -1,5 +1,5 @@
 # brewclog
-## Display the Last Changelog of a Brew Formula
+## Display the last Changelog of a Brew Formula
 
 ## 💾 Installation
 
