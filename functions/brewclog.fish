@@ -1,6 +1,6 @@
 function brewclog
     # Function: brewclog
-    # Version 1.0.1
+    set -l bcl_version "Version 1.0.2"
     # Author Laurent Taupiac
     # Purpose: display the last changlog of a brew formula
 
@@ -37,7 +37,7 @@ function brewclog
     # If --help / -h is set, display help
     if set -q _flag_help
         echo "Usage: brewclog [options] <formula>"
-        echo "Version 1.0"
+        echo $bcl_version
         echo "Purpose: display the last changlog of a brew formula"
         echo
         echo "Options:"
