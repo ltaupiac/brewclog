@@ -3,7 +3,7 @@
 
 ## 💾 Installation
 
-fisher ltaupiac/brewclog
+fisher install ltaupiac/brewclog
 
 ### Usage
 Usage: brewclog [options] <formula>
