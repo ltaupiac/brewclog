@@ -1,6 +1,6 @@
 function brewclog
     # Function: brewclog
-    # Version 1.0 
+    # Version 1.0.1
     # Author Laurent Taupiac
     # Purpose: display the last changlog of a brew formula
 
