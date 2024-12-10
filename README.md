@@ -5,6 +5,10 @@
 
 fisher install ltaupiac/brewclog
 
+Demo :
+
+![demo](./demo.png)
+
 ### Usage
 Usage: brewclog [options] <formula>
 
