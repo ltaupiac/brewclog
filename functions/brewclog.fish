@@ -1,11 +1,11 @@
 function brewclog
     # Function: brewclog
-    set -l bcl_version "Version 1.0.2"
+    set -l bcl_version "Version 1.0.3"
     # Author Laurent Taupiac
     # Purpose: display the last changlog of a brew formula
 
     # Required commands
-    set -l cmd_req jq glow
+    set -l cmd_req jq glow trurl
     for c in $cmd_req
         if not type -q $c
             echo "The command [$c] must be installed (e.g., brew install $c)"

@@ -24,8 +24,9 @@ An abbr is defined : **,bl**
 
 ### Dependencies
 
-- jq   :  Command-line JSON processor
-- glow :  Render Markdown on the CLI, with pizzazz!
+- jq    : Command-line JSON processor
+- glow  : Render Markdown on the CLI, with pizzazz!
+- trurl : Url manipulation
 
 ### Limitations
 Works only for GitHub
