@@ -5,7 +5,7 @@ function brewclog
     set -l bcl_required_cmds jq glow trurl    # Author Laurent Taupiac
     # Purpose: display the last changlog of a brew formula
 
-    set -l verbose 0
+    set -x verbose 0
     set -l commande ""
 
     # Using argparse to handle arguments
@@ -39,7 +39,7 @@ function brewclog
         echo "Purpose: display the last changlog of a brew formula"
         echo
         echo "Options:"
-        echo "  -t, --trace   : Show additional information"
+        echo "  -t, --trace   : Verbose mode"
         echo "  -d, --debug   : Show debugging information"
         echo "  -h, --help    : Show this help message"
         echo "  -v, --version : Show version"
@@ -48,7 +48,8 @@ function brewclog
 
     # Check if trace mode is enabled
     if set -q _flag_trace
-        set verbose 1
+        echo "Verbose mode"
+        set -x verbose 1
     end 
 
     # After argparse, $argv contains only non-option arguments
@@ -58,29 +59,32 @@ function brewclog
         set -e fish_trace fish_log
         return 1
     end
+    # The first non-option argument is the formula name
+    set -l commande $argv[1]
 
     # Check and install required commands
     check_and_install_cmds $bcl_required_cmds
 
-    # The first non-option argument is the formula name
-    set -l commande $argv[1]
+    # Call the external function to get the repo URL
+    set -l repo (get_brew_repo_url $commande $verbose)
+
+    # Check the result of the function
+    if test -z "$repo"
+        echo "Failed to retrieve repo URL for formula: $commande"
+        set -e fish_trace fish_log
+        return 1
+    end
 
     # Retrieve the repo URL using brew ruby
     set -l repo (brew ruby -e "f = Formula['$commande']; puts f.head.url" 2>/dev/null )
 
-    if test $verbose = 1
-        echo "Repo value obtained via brew ruby head.url: [$repo]"
-    end
+    trace "Repo value obtained via brew ruby head.url: [$repo]"
 
     # If not found, fallback to homepage
     if test -z "$repo"
-        if test $verbose = 1
-            echo "No head repo found, falling back via brew info: [fallback]"
-        end
-        set repo (brew info --json "$commande" | jq -r '.[]|.homepage')
-        if test $verbose = 1
-            echo "Formula git repo: [$repo]"
-        end
+        trace "No head repo found, falling back via brew info: [fallback]"
+        set repo (brew info --json "$commande" | jq -r '.formulae[]|.homepage')
+        trace "Formula git repo: [$repo]"
         if test -z "$repo"
             echo "No formula found for $commande"
             set -e fish_trace fish_log
@@ -93,9 +97,7 @@ function brewclog
     # Check the host before continuing
     set -l current_host (trurl --get {host} "$repo")
     if test "$current_host" != "github.com"
-        if test $verbose = 1
-            echo "Current host: [$current_host]"
-        end
+        trace "Current host: [$current_host]"
         echo "This repository is not yet supported. Only GitHub is supported."
         echo "host: $repo"
         set -e fish_trace fish_log
@@ -105,9 +107,7 @@ function brewclog
     # Add the /releases/latest suffix
     set repo (echo $repo | sed 's#$#/releases/latest#')
 
-    if test $verbose = 1
-        echo "Repo with /releases/latest suffix: [$repo]"
-    end
+    trace "Repo with /releases/latest suffix: [$repo]"
 
     # Change the host to api.github.com
     set repo (trurl --set host='api.github.com' $repo)
@@ -116,28 +116,29 @@ function brewclog
     set -l extracted_path (trurl --get {path} "$repo")
     set -l path "/repos$extracted_path"
 
-    if test $verbose = 1
-        echo "Recalculated path: [$path]"
-    end
+    trace "Recalculated path: [$path]"
     
     # Update the path
     set -l repo (trurl --set path="$path" "$repo")
 
-    if test $verbose = 1
-        echo "Repo for changelog: [$repo]"
-    end
+    trace "Repo for changelog: [$repo]"
 
     # Retrieve the tag_name and body of the release + display with glow
     curl -s "$repo" | jq -r '.tag_name, .body' | glow -p
     set -e fish_trace fish_log
 end
 
+function trace 
+    if test "$verbose" = "1"
+        echo (set_color green)"Trace: $argv[1]"(set_color normal) >&2
+    end
+end
+
 function check_and_install_cmds
-    echo "checking tools"
     # Required commands
     set -l required_cmds $argv    
     # Initialize a variable to hold missing commands
-    set -l missing_cmds
+    set -l missing_cmds 
 
     # Loop through the required commands
     for c in $required_cmds
@@ -173,3 +174,37 @@ function check_and_install_cmds
     end
 end
 
+function get_brew_repo_url
+    # Arguments: formula name 
+    set -l formula_name $argv[1]
+    
+    trace "searching repo for formula [$formula_name]"
+
+    if test -z "$formula_name"
+        echo "Error calling get_brew_repo_url: no formula"
+        return 1
+    end
+
+    # Retrieve the repo URL using brew ruby
+    set -l repo (brew ruby -e "f = Formula['$formula_name']; puts f.head.url" 2>/dev/null)
+
+    trace "Repo value obtained via brew ruby head.url: [$repo]"
+
+    # If not found, fallback to homepage
+    if test -z "$repo"
+        trace "No head repo found, fallback json brew info"
+        set repo (brew info --json=v2 "$formula_name" | jq -r '.formulae[]?.homepage, .casks[]?.homepage')
+        trace "Formula git repo (from json homepage): [$repo]"
+
+        if test -z "$repo"
+            echo "No formula found for $formula_name"
+            return 1
+        end
+    else
+        # Clean up `.git` suffix if present
+        set repo (echo $repo | sed 's#\.git$##')
+    end
+
+    # Output the result
+    echo $repo
+end
