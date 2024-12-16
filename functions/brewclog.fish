@@ -75,24 +75,7 @@ function brewclog
         return 1
     end
 
-    # Retrieve the repo URL using brew ruby
-    set -l repo (brew ruby -e "f = Formula['$commande']; puts f.head.url" 2>/dev/null )
-
-    trace "Repo value obtained via brew ruby head.url: [$repo]"
-
-    # If not found, fallback to homepage
-    if test -z "$repo"
-        trace "No head repo found, falling back via brew info: [fallback]"
-        set repo (brew info --json "$commande" | jq -r '.formulae[]|.homepage')
-        trace "Formula git repo: [$repo]"
-        if test -z "$repo"
-            echo "No formula found for $commande"
-            set -e fish_trace fish_log
-            return 1
-        end
-    else
-        set repo (echo $repo | sed 's#\.git$##')
-    end
+    set repo (echo $repo | sed 's#\.git$##')
 
     # Check the host before continuing
     set -l current_host (trurl --get {host} "$repo")
@@ -132,6 +115,10 @@ function trace
     if test "$verbose" = "1"
         echo (set_color green)"Trace: $argv[1]"(set_color normal) >&2
     end
+end
+
+function show
+      echo $argv[1] >&2
 end
 
 function check_and_install_cmds
@@ -181,7 +168,7 @@ function get_brew_repo_url
     trace "searching repo for formula [$formula_name]"
 
     if test -z "$formula_name"
-        echo "Error calling get_brew_repo_url: no formula"
+        trace "Error calling get_brew_repo_url: no formula"
         return 1
     end
 
@@ -193,11 +180,11 @@ function get_brew_repo_url
     # If not found, fallback to homepage
     if test -z "$repo"
         trace "No head repo found, fallback json brew info"
-        set repo (brew info --json=v2 "$formula_name" | jq -r '.formulae[]?.homepage, .casks[]?.homepage')
+        set repo (brew info --json=v2 "$formula_name" | jq -r '.formulae[]?.homepage // empty, .casks[]?.homepage // empty')
         trace "Formula git repo (from json homepage): [$repo]"
 
         if test -z "$repo"
-            echo "No formula found for $formula_name"
+            trace "No formula found for $formula_name"
             return 1
         end
     else
@@ -208,3 +195,4 @@ function get_brew_repo_url
     # Output the result
     echo $repo
 end
+

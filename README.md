@@ -16,11 +16,13 @@ Displays the changeclog of the latest GitHub release of a Homebrew formula.
 
 Options:
 
--v, --verbose : Show additional information
+-t, --trace : Verbose mode
 
 -d, --debug : Show debugging information
 
 -h, --help : Show this help message
+
+-v, --version : Show version
 
 ### Abbr
 
