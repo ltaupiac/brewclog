@@ -1,5 +1,5 @@
 # brewclog
-## Display the last Changelog of a Brew Formula
+## Display the last changelog of a Brew Formula
 
 ## 💾 Installation
 
@@ -12,7 +12,7 @@ Demo :
 ### Usage
 Usage: brewclog [options] <formula>
 
-Displays the changeclog of the latest GitHub release of a Homebrew formula.
+Displays the changelog of the latest GitHub release of a Homebrew formula.
 
 Options:
 
@@ -32,7 +32,7 @@ An abbr is defined : **,bl**
 
 - jq    : Command-line JSON processor
 - glow  : Render Markdown on the CLI, with pizzazz!
-- trurl : Url manipulation
+- trurl : URL manipulation
 
 ### Limitations
 Works only for GitHub
